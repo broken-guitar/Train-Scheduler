@@ -10,6 +10,8 @@
     <!-- <link rel="stylesheet" type="text/css" href="https://meyerweb.com/eric/tools/css/reset/reset.css" /> -->
     <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/6.0.4/firebase-database.js"></script>
+    <script src="assets/javascript/moment.js"></script>
+    <script type="text/javascript" src="assets/javascript/train-scheduler-app.js"></script>
     <link rel="stylesheet" type="text/css" href="assets/css/style.css" />
 </head>
 
@@ -50,7 +52,7 @@
             </div>
         </section>
 
-        <section id="input-row" class="row card text-white bg-light mt-4">
+        <section id="input-row" class="row card text-dark bg-light mt-4">
             <div class="card-header bg-secondary">Add Train</div>
             <form class="px-3 py-4">
                 <div class="form-group">
@@ -63,7 +65,7 @@
                 </div>
                 <div class="form-group">
                     <label for="inputStartDate">First Train Time (HH:mm - military time)</label>
-                    <input type="date" class="form-control" id="inputFirstTrainTime">
+                    <input type="time" class="form-control" id="inputFirstTrainTime">
                 </div>
                 <div class="form-group">
                     <label for="inputMonthlyRate">Frequency (min.)</label>
@@ -86,7 +88,7 @@
     </script>
 
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
-    <script type="text/javascript" src="assets/javascript/train-scheduler-app.js"></script>
+
 </body>
 
 </html>

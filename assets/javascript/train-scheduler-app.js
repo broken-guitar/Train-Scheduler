@@ -12,19 +12,57 @@ var cfg = {
 firebase.initializeApp(cfg);
 var db = firebase.database();
 
+// VARIABLES
+
+// FUNCTIONS
+
+// EXAMPLE: update() method to update than one location 
+function writeNewPost(uid, username, picture, title, body) {
+    // A post entry.
+    var postData = {
+        author: username,
+        uid: uid,
+        body: body,
+        title: title,
+        starCount: 0,
+        authorPic: picture
+    };
+
+    // Get a key for a new Post.
+    var newPostKey = firebase.database().ref().child('posts').push().key;
+
+    // Write the new post's data simultaneously in the posts list and the user's post list.
+    var updates = {};
+    updates['/posts/' + newPostKey] = postData;
+    updates['/user-posts/' + uid + '/' + newPostKey] = postData;
+
+    return firebase.database().ref().update(updates);
+}
+
+
+// INITIALIZE/MAIN
+
+console.log("moment test: ", moment().format("YY hh:mm"))
+
 // TODO: initialize database nodes if necessary
 var rootRef = db.ref();
-rootRef.once("value").then(function (snap) {
-    let key = snap.key
-    let trainsKey = snap.child("/trains").key;
-    let trainsRef = snap.child("/trains");
-    let destinationsRef = snap.child("/destinations")
+var trainsRef = db.ref("/trains");
+var destsRef = db.ref("/dests");
+// trainsRef.on("value", function (snap) {
+//     if (!snap.exists()) {
+//         rootRef.set({
+//             trains: {}
+//         });
+//     };
+// });
 
-    console.log("/trains exists? ", trainsRef.exists());
-});
-
-
-
+// destinationsRef.on("value", function (snap) {
+//     if (!snap.exists()) {
+//         rootRef.set({
+//             dests: {}
+//         });
+//     };
+// });
 
 
 
@@ -44,11 +82,21 @@ $("#add-train-button").on("click", function (e) {
     e.preventDefault();
     // console.log("add train button clicked");
 
-    let name = $("#inputEmployeeName").val().trim();
-    let role = $("#inputRole").val().trim();
-    let startDate = $("#inputStartDate").val().trim();
-    let monthlyRate = $("#inputMonthlyRate").val().trim();
-    // let something = ?;
+    let trainName = $("#inputTrainName").val().trim();
+    let destination = $("#inputDestination").val().trim();
+    let firstTrainTime = $("#inputFirstTrainTime").val().trim();
+    let inputFrequency = $("#inputFrequency").val().trim();
+
+    let trainData = {
+        name: trainName,
+
+
+    }
+
+
+    let newTrainKey = trainsRef.push.key;
+    let updates = {};
+    updates['/posts/' + newTrainKey]
 
     db.ref().push({
         _name: name,
