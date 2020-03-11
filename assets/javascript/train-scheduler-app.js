@@ -88,24 +88,28 @@ $("#add-train-button").on("click", function (e) {
     let inputFrequency = $("#inputFrequency").val().trim();
 
     let trainData = {
-        name: trainName,
-
-
+        "name": trainName,
+        "destination": destination,
+        "frequency": inputFrequency,
+        "dateAdded": firebase.database.ServerValue.TIMESTAMP
     }
-
-
-    let newTrainKey = trainsRef.push.key;
+    let newTrainKey = db.ref().child('/trains').push().key;
     let updates = {};
-    updates['/posts/' + newTrainKey]
+    updates['/trains/' + newTrainKey] = trainData;
+    updates['/dests/' + destination] = {
+        "train": trainName
+    };
 
-    db.ref().push({
-        _name: name,
-        _role: role,
-        _start_date: startDate,
-        _monthly_rate: monthlyRate,
-        _dateAdded: firebase.database.ServerValue.TIMESTAMP
-        // _something: null
-    });
+    db.ref().update(updates);
+
+    // db.ref().push({
+    //     _name: name,
+    //     _role: role,
+    //     _start_date: startDate,
+    //     _monthly_rate: monthlyRate,
+    //     _dateAdded: firebase.database.ServerValue.TIMESTAMP
+    //     // _something: null
+    // });
 
 });
 
@@ -115,13 +119,14 @@ db.ref().on("value", function (snapshot) {
 
 });
 
-
-
-db.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function (childSnapshot) {
-
+db.ref("/trains").on("child_added", function (snap) {
     // runs this function for every child; runs on load
 
-    console.log("child_added: ", childSnapshot.val()._name);
+    console.log("child_added listner: ", snap.val());
+
+    snap.forEach(function (childSnap) {
+        console.log("foreach: ", snap.key, childSnap.key, childSnap.val(), childSnap.parent);
+    });
 
     // TODO append all employees from the database to the DOM
     // starter: $("#where-employee-list-goes").append();
