@@ -48,35 +48,6 @@ console.log("moment test: ", moment().format("YY hh:mm"))
 var rootRef = db.ref();
 var trainsRef = db.ref("/trains");
 var destsRef = db.ref("/dests");
-// trainsRef.on("value", function (snap) {
-//     if (!snap.exists()) {
-//         rootRef.set({
-//             trains: {}
-//         });
-//     };
-// });
-
-// destinationsRef.on("value", function (snap) {
-//     if (!snap.exists()) {
-//         rootRef.set({
-//             dests: {}
-//         });
-//     };
-// });
-
-
-
-
-
-// database.ref().push({
-//     _name: null,
-//     _role: null,
-//     _startDate: null,
-//     _monthlyRate: null,
-//     _dateAdded: null
-// });
-
-// console.log("database.snapshot: ", database.snapshot);
 
 $("#add-train-button").on("click", function (e) {
     e.preventDefault();
@@ -92,6 +63,13 @@ $("#add-train-button").on("click", function (e) {
         "destination": destination,
         "frequency": inputFrequency,
         "dateAdded": firebase.database.ServerValue.TIMESTAMP
+    };
+
+    trainsRef.once('value')
+
+    let destData = {
+        "name":destination,
+        train:
     }
     let newTrainKey = db.ref().child('/trains').push().key;
     let updates = {};
@@ -102,20 +80,31 @@ $("#add-train-button").on("click", function (e) {
 
     db.ref().update(updates);
 
-    // db.ref().push({
-    //     _name: name,
-    //     _role: role,
-    //     _start_date: startDate,
-    //     _monthly_rate: monthlyRate,
-    //     _dateAdded: firebase.database.ServerValue.TIMESTAMP
-    //     // _something: null
-    // });
+    // TODOS (big list, lots to still figure out)
+    // - trying to flatten data in firebase by putting trains and destinations in separate nodes
+    // - need to figure out if a train already exists by same name value
+    // -    - need to loop through children in /trains and find existing child with same name
+    // -        if the child exists then use that unique id to update/add child in destination node
+    // -   - work on looping through list of /trains children (which are unique push keys);
+    //          - then see if:
+    //          -   can i get name value for each unique key? 
+    //          -       -if yes: then can i check BEFORE i create new child (value change event necessary? once?)    
+    //          -       -   -   can i run the 'once' listener WITHIN another listener to check existence before pushing?
+    // - NOTE TO SELF/READER:
+    //      this working through lists in firebase to maintain links between separate nodes
+    //      while preventing duplication is apparently move involved then just appending a
+    //      single flat list of children containint all table values (and also less real world functional)
+    //
+    //      firebase only has listener functions to 'read/write' data; how to handle updates while checking for existence?
+    //      
 
 });
 
-db.ref().on("value", function (snapshot) {
+db.ref().on("value", function (snap) {
     // do something when values in database change
+    console.log("db.ref snap.val: ", snap.val());
 
+    console.log(rootRef.child("/"))
 
 });
 
@@ -128,12 +117,10 @@ db.ref("/trains").on("child_added", function (snap) {
         console.log("foreach: ", snap.key, childSnap.key, childSnap.val(), childSnap.parent);
     });
 
-    // TODO append all employees from the database to the DOM
-    // starter: $("#where-employee-list-goes").append();
-
-    //
 });
 
 // Ref: db.ref().orderByChild("dateAdded").limitToLast(1).on("child_added"
 //      orders by date, then shows last result (one last result)
 //      note: useful to show last added user
+// TODO append all employees from the database to the DOM
+// starter: $("#where-employee-list-goes").append();
