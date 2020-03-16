@@ -10,44 +10,38 @@ var cfg = {
 };
 // Initialize Firebase
 firebase.initializeApp(cfg);
-var db = firebase.database();
 
 // VARIABLES
+var db = firebase.database();
+
+
 
 // FUNCTIONS
 
-// EXAMPLE: update() method to update than one location 
-function writeNewPost(uid, username, picture, title, body) {
-    // A post entry.
-    var postData = {
-        author: username,
-        uid: uid,
-        body: body,
-        title: title,
-        starCount: 0,
-        authorPic: picture
-    };
-
-    // Get a key for a new Post.
-    var newPostKey = firebase.database().ref().child('posts').push().key;
-
-    // Write the new post's data simultaneously in the posts list and the user's post list.
-    var updates = {};
-    updates['/posts/' + newPostKey] = postData;
-    updates['/user-posts/' + uid + '/' + newPostKey] = postData;
-
-    return firebase.database().ref().update(updates);
+function getArrivalTimes(firstTrainTime, trainFrequency){
+    let firstTimeConverted = moment(firstTrainTime, "HH:mm").subtract(1, "years");
+    // get current time as a Moment object:
+    let currentTime = moment(); 
+    // use moment to get difference between current time and firstTrainTime in minutes
+    let diffTime = moment().diff(moment(firstTimeConverted), "minutes");
+    // use modulus to get remainder of diffTime divided by trainFrequency in minutes
+    let timeRemainder = diffTime % trainFrequency;
+    // get minutes to next arrival time: difference of trainFrequency and timeRemainder
+    // (note: timeRemainder is basically how many mintues have already passed in the current trip interval,
+    // so subtracting this value from the frequency tells us how many more minutes to arrival)
+    let minutesAway = trainFrequency - timeRemainder;
+    // use moment to add minutesAway to current time to get next arrival time as a moment object
+    let nextArrivalMoment = moment().add(minutesAway, "minutes");
+    
+    return [nextArrivalMoment, minutesAway];
 }
 
 
 // INITIALIZE/MAIN
 
-console.log("moment test: ", moment().format("YY hh:mm"))
+//console.log("moment test: ", moment().format("YY hh:mm")) // returns current time in specified format
 
-// TODO: initialize database nodes if necessary
-var rootRef = db.ref();
-var trainsRef = db.ref("/trains");
-var destsRef = db.ref("/dests");
+
 
 $("#add-train-button").on("click", function (e) {
     e.preventDefault();
@@ -56,71 +50,61 @@ $("#add-train-button").on("click", function (e) {
     let trainName = $("#inputTrainName").val().trim();
     let destination = $("#inputDestination").val().trim();
     let firstTrainTime = $("#inputFirstTrainTime").val().trim();
-    let inputFrequency = $("#inputFrequency").val().trim();
+    let trainFrequency = $("#inputFrequency").val().trim();
 
-    let trainData = {
-        "name": trainName,
-        "destination": destination,
-        "frequency": inputFrequency,
-        "dateAdded": firebase.database.ServerValue.TIMESTAMP
-    };
+    let arrArrivalTimes = getArrivalTimes(firstTrainTime, trainFrequency);
 
-    trainsRef.once('value')
+    console.log("arrTimes: ", arrArrivalTimes[0], arrArrivalTimes[1]);
 
-    let destData = {
-        "name":destination,
-        train:
-    }
-    let newTrainKey = db.ref().child('/trains').push().key;
-    let updates = {};
-    updates['/trains/' + newTrainKey] = trainData;
-    updates['/dests/' + destination] = {
-        "train": trainName
-    };
-
-    db.ref().update(updates);
-
-    // TODOS (big list, lots to still figure out)
-    // - trying to flatten data in firebase by putting trains and destinations in separate nodes
-    // - need to figure out if a train already exists by same name value
-    // -    - need to loop through children in /trains and find existing child with same name
-    // -        if the child exists then use that unique id to update/add child in destination node
-    // -   - work on looping through list of /trains children (which are unique push keys);
-    //          - then see if:
-    //          -   can i get name value for each unique key? 
-    //          -       -if yes: then can i check BEFORE i create new child (value change event necessary? once?)    
-    //          -       -   -   can i run the 'once' listener WITHIN another listener to check existence before pushing?
-    // - NOTE TO SELF/READER:
-    //      this working through lists in firebase to maintain links between separate nodes
-    //      while preventing duplication is apparently move involved then just appending a
-    //      single flat list of children containint all table values (and also less real world functional)
-    //
-    //      firebase only has listener functions to 'read/write' data; how to handle updates while checking for existence?
-    //      
+    db.ref().push({
+        trainName: trainName,
+        destination: destination,
+        firstTrainTime: firstTrainTime,
+        trainFrequency: trainFrequency,
+        dateAdded: firebase.database.ServerValue.TIMESTAMP
+    })
 
 });
 
-db.ref().on("value", function (snap) {
-    // do something when values in database change
-    console.log("db.ref snap.val: ", snap.val());
+db.ref().on("child_added", function (childSnap){
 
-    console.log(rootRef.child("/"))
+    let firstTrainTime = childSnap.val().firstTrainTime;
+    let trainFrequency = childSnap.val().trainFrequency;
+    let arrArrivalTimes = getArrivalTimes(firstTrainTime, trainFrequency);
+    // next arrival time is returned as a moment object, use moment to format it
+    let displayNextArrivalTime = moment(arrArrivalTimes[0]).format("h:mm a");
+
+    let $tr = $("<tr>");
+    let $tdTrainName = $("<td>").text(childSnap.val().trainName);
+    let $tdDestination = $("<td>").text(childSnap.val().destination);
+    // let $tdFirstTrainTime = $("<td>").text(childSnap.val().firstTrainTime);
+    let $tdFrequency = $("<td>").text(childSnap.val().trainFrequency);
+    let $tdNextArrivalTime = $("<td>").text(displayNextArrivalTime);
+    let $tdMinutesAway = $("<td>").text(arrArrivalTimes[1].toString());
+
+    $tr.append($tdTrainName);
+    $tr.append($tdDestination);
+    // $tr.append($tdFirstTrainTime);
+    $tr.append($tdFrequency);
+    $tr.append($tdNextArrivalTime);
+    $tr.append($tdMinutesAway);
+
+    $("#train-table-body").append($tr);
+    
 
 });
+// db.ref().orderByChild("dateAdded").limitToLast(1).on("child_added", function (childSnapshot) {
 
-db.ref("/trains").on("child_added", function (snap) {
-    // runs this function for every child; runs on load
+//     // runs this function for every child; runs on load
 
-    console.log("child_added listner: ", snap.val());
+//     //console.log("child_added: ", childSnapshot.val()._name);
 
-    snap.forEach(function (childSnap) {
-        console.log("foreach: ", snap.key, childSnap.key, childSnap.val(), childSnap.parent);
-    });
+//     // TODO append all employees from the database to the DOM
+//     // starter: $("#where-employee-list-goes").append();
 
-});
+//     //
+// });
 
 // Ref: db.ref().orderByChild("dateAdded").limitToLast(1).on("child_added"
 //      orders by date, then shows last result (one last result)
 //      note: useful to show last added user
-// TODO append all employees from the database to the DOM
-// starter: $("#where-employee-list-goes").append();

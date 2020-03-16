@@ -19,7 +19,7 @@
         <section id="header-row" class="row">
             <div class="jumbotron col-12 jumbotron-fluid bg-dark text-light text-center">
                 <h1 class="display-4">Train Scheduler</h1>
-                <h2 class="display-5">Blah Blah Blah</h2>
+                <h2 class="display-5">Demo</h2>
 
             </div>
 
@@ -38,36 +38,30 @@
                             <th scope="col">Minutes Away</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <tr>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                            <td></td>
-                        </tr>
+                    <tbody id="train-table-body">
+                    
                     </tbody>
                 </table>
             </div>
         </section>
 
         <section id="input-row" class="row card text-dark bg-light mt-4">
-            <div class="card-header bg-secondary">Add Train</div>
+            <div class="card-header bg-secondary text-white">Add Train</div>
             <form class="px-3 py-4">
                 <div class="form-group">
-                    <label for="inputEmployeeName">Train Name</label>
+                    <label for="inputTrainName">Train Name</label>
                     <input type="text" class="form-control" id="inputTrainName" aria-describedby="">
                 </div>
                 <div class="form-group">
-                    <label for="inputRole">Destination</label>
+                    <label for="inputDestination">Destination</label>
                     <input type="text" class="form-control" id="inputDestination">
                 </div>
                 <div class="form-group">
-                    <label for="inputStartDate">First Train Time (HH:mm - military time)</label>
+                    <label for="inputFirstTrainTime">First Train Time (HH:mm - military time)</label>
                     <input type="time" class="form-control" id="inputFirstTrainTime">
                 </div>
                 <div class="form-group">
-                    <label for="inputMonthlyRate">Frequency (min.)</label>
+                    <label for="inputFrequency">Frequency (min.)</label>
                     <input type="number" class="form-control" id="inputFrequency">
                 </div>
                 <button id="add-train-button" type="submit" class="btn btn-primary">Submit</button>
